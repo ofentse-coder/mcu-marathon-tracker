@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MCU Marathon Tracker - Track your viewing progress, calculate schedules, and explore the Marvel Cinematic Universe in release or chronological order.">
+    <title>MCU Marathon Tracker | The Ultimate Cinematic Guide</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Starfield Background Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="cinematic-header">
+            <div class="header-logo">
+                <span class="logo-sub">MARVEL CINEMATIC UNIVERSE</span>
+                <h1 class="logo-main">MARATHON <span class="accent-text">TRACKER</span></h1>
+            </div>
+            <p class="header-tagline">Your ultimate guide to tracking the infinity saga, multiverse saga, and beyond.</p>
+        </header>
+
+        <!-- Stats & Progress Dashboard -->
+        <section class="dashboard-section glass-panel">
+            <div class="dashboard-grid">
+                <!-- Watch Progress Progressbar -->
+                <div class="stat-card progress-card">
+                    <h3>Overall Completion</h3>
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" width="120" height="120">
+                            <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                            <circle class="progress-ring__circle" id="progressCircle" stroke="url(#gradientProgress)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                            <defs>
+                                <linearGradient id="gradientProgress" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ed1d24" />
+                                    <stop offset="100%" stop-color="#ffaf7b" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="progress-ring-text">
+                            <span class="progress-percent" id="progressPercent">0%</span>
+                            <span class="progress-sub" id="progressRatio">0 / 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Remaining Card -->
+                <div class="stat-card time-card">
+                    <div class="stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div class="stat-info">
+                        <h3>Watch Time Tracked</h3>
+                        <div class="stat-value" id="timeWatched">0h 0m</div>
+                        <p class="stat-sub">Completed of <span id="totalTime">0h</span> total marathon</p>
+                    </div>
+                </div>
+
+                <!-- Time Left Card -->
+                <div class="stat-card time-left-card">
+                    <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+                    <div class="stat-info">
+                        <h3>Watch Time Remaining</h3>
+                        <div class="stat-value text-red" id="timeRemaining">0h 0m</div>
+                        <p class="stat-sub">Required to finish the marathon</p>
+                    </div>
+                </div>
+
+                <!-- Media Breakdown Card -->
+                <div class="stat-card breakdown-card">
+                    <h3>Media Completed</h3>
+                    <div class="breakdown-stats">
+                        <div class="breakdown-item">
+                            <span class="breakdown-label"><i class="fa-solid fa-film"></i> Movies</span>
+                            <span class="breakdown-val" id="moviesCount">0 / 0</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label"><i class="fa-solid fa-tv"></i> Series</span>
+                            <span class="breakdown-val" id="seriesCount">0 / 0</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span class="breakdown-label"><i class="fa-solid fa-mask"></i> Specials</span>
+                            <span class="breakdown-val" id="specialsCount">0 / 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase Progress Tracks -->
+            <div class="phase-progress-container">
+                <h4>Progress By Phase</h4>
+                <div class="phase-bars" id="phaseBarsContainer">
+                    <!-- Javascript will generate bars here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls, Filters, and Interactive widgets -->
+        <section class="controls-section">
+            
+            <!-- Filter & Sort Panel -->
+            <div class="filter-panel glass-panel">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search movies, characters, directors...">
+                </div>
+
+                <div class="filters-row">
+                    <!-- Type Filter -->
+                    <div class="filter-group">
+                        <label for="typeFilter"><i class="fa-solid fa-film"></i> Format</label>
+                        <select id="typeFilter">
+                            <option value="all">All Formats</option>
+                            <option value="movie">Movies Only</option>
+                            <option value="series">Disney+ Series</option>
+                            <option value="special">Specials</option>
+                        </select>
+                    </div>
+
+                    <!-- Phase Filter -->
+                    <div class="filter-group">
+                        <label for="phaseFilter"><i class="fa-solid fa-layer-group"></i> Saga Phase</label>
+                        <select id="phaseFilter">
+                            <option value="all">All Phases</option>
+                            <option value="1">Phase 1 (Infinity Saga)</option>
+                            <option value="2">Phase 2 (Infinity Saga)</option>
+                            <option value="3">Phase 3 (Infinity Saga)</option>
+                            <option value="4">Phase 4 (Multiverse Saga)</option>
+                            <option value="5">Phase 5 (Multiverse Saga)</option>
+                        </select>
+                    </div>
+
+                    <!-- Watched Filter -->
+                    <div class="filter-group">
+                        <label for="statusFilter"><i class="fa-solid fa-circle-check"></i> Status</label>
+                        <select id="statusFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="watched">Watched</option>
+                            <option value="unwatched">Unwatched</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort Options -->
+                    <div class="filter-group">
+                        <label for="sortBy"><i class="fa-solid fa-sort"></i> Sort By</label>
+                        <select id="sortBy">
+                            <option value="release">Release Order</option>
+                            <option value="chronological">Chronological Order</option>
+                            <option value="runtime-desc">Longest Runtime</option>
+                            <option value="runtime-asc">Shortest Runtime</option>
+                            <option value="rating-imdb">IMDb Rating</option>
+                            <option value="rating-rt">Rotten Tomatoes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Order Toggles & Quick Actions -->
+                <div class="controls-actions">
+                    <div class="toggle-container">
+                        <span class="toggle-label">Order Mode:</span>
+                        <div class="order-toggle-buttons">
+                            <button id="orderReleaseBtn" class="toggle-btn active" data-order="release">
+                                <i class="fa-solid fa-calendar-days"></i> Release Order
+                            </button>
+                            <button id="orderChronoBtn" class="toggle-btn" data-order="chrono">
+                                <i class="fa-solid fa-timeline"></i> Chronological
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="surpriseMeBtn" class="btn btn-secondary" title="Pick a random next unwatched title">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Next to Watch
+                        </button>
+                        <button id="markAllBtn" class="btn btn-secondary" title="Mark all filtered as Watched">
+                            <i class="fa-solid fa-check-double"></i> Mark All
+                        </button>
+                        <button id="resetAllBtn" class="btn btn-danger" title="Clear all watched progress">
+                            <i class="fa-solid fa-trash-can"></i> Reset Progress
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Widgets Grid (Schedule and Surprise Widgets) -->
+            <div class="widgets-grid">
+                
+                <!-- Marathon Schedule Calculator -->
+                <div class="widget-card glass-panel calculator-widget">
+                    <h3><i class="fa-solid fa-calculator accent-text"></i> Marathon Schedule Planner</h3>
+                    <p class="widget-desc">Select your target completion date to calculate the daily watch budget required for your remaining titles.</p>
+                    <div class="calculator-inputs">
+                        <div class="input-group">
+                            <label for="targetDate">Target Completion Date</label>
+                            <input type="date" id="targetDate">
+                        </div>
+                        <button id="calculateBtn" class="btn btn-primary">Calculate Watch Plan</button>
+                    </div>
+                    <div class="calculator-results" id="calcResults" style="display: none;">
+                        <!-- Results injected here -->
+                    </div>
+                </div>
+
+                <!-- Cinematic Quote / Fun Facts Widget -->
+                <div class="widget-card glass-panel trivia-widget">
+                    <h3><i class="fa-solid fa-meteor accent-text"></i> Jarvis Intelligence</h3>
+                    <div class="trivia-content">
+                        <p class="trivia-quote" id="triviaQuote">"Part of the journey is the end."</p>
+                        <p class="trivia-author" id="triviaAuthor">- Tony Stark</p>
+                    </div>
+                    <div class="trivia-stat-fact" id="triviaFact">
+                        Did you know? Watching the entire MCU in one sitting would take over 130 hours!
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Main Media Grid -->
+        <main class="media-grid-section">
+            <div class="grid-header">
+                <h2>Marvel Cinematic Universe Titles (<span id="showingCount">0</span>)</h2>
+                <div class="grid-view-info" id="gridInfoText">Showing release order</div>
+            </div>
+            
+            <div class="media-grid" id="mediaGrid">
+                <!-- Javascript will dynamically inject movie cards here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>No heroes found matching your search.</h3>
+                <p>Try clearing your search terms or filters to reveal the full timeline.</p>
+                <button id="clearFiltersBtn" class="btn btn-primary">Reset All Filters</button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>MCU Marathon Tracker &copy; 2026. Made with <i class="fa-solid fa-heart accent-text text-pulse"></i> for True Believers.</p>
+            <p class="footer-disclaimer">All Marvel Cinematic Universe assets, characters, and titles are trademarks of Marvel Studios &amp; Disney.</p>
+        </footer>
+
+    </div>
+
+    <!-- Movie Details Slide-Out Drawer / Modal -->
+    <div class="modal-overlay" id="detailsModal">
+        <div class="modal-content glass-panel">
+            <button class="modal-close" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="modal-header-hero" id="modalHero">
+                <span class="modal-phase-tag" id="modalPhaseTag">Phase 1</span>
+                <h2 id="modalTitle">Iron Man</h2>
+                <p class="modal-tagline" id="modalSubtitle">Director: Jon Favreau &bull; 2008</p>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Format</span>
+                        <span class="meta-value" id="modalFormat"><i class="fa-solid fa-film"></i> Movie</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Runtime</span>
+                        <span class="meta-value" id="modalRuntime">126 minutes</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">IMDb Rating</span>
+                        <span class="meta-value" id="modalIMDb"><i class="fa-solid fa-star text-gold"></i> 7.9</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Rotten Tomatoes</span>
+                        <span class="meta-value" id="modalRT"><i class="fa-solid fa-apple-whole text-red"></i> 94%</span>
+                    </div>
+                </div>
+
+                <div class="modal-info-block">
+                    <h3>Synopsis</h3>
+                    <p id="modalSynopsis">Movie synopsis goes here.</p>
+                </div>
+
+                <div class="modal-info-block">
+                    <h3>Key Characters Introduced / Present</h3>
+                    <div class="character-tags" id="modalCharacters">
+                        <!-- Tags injected -->
+                    </div>
+                </div>
+
+                <div class="modal-info-block inline-meta">
+                    <div class="post-credits-info">
+                        <i class="fa-solid fa-clapperboard"></i> 
+                        <span>Post-Credit Scenes: <strong id="modalPostCredits">1</strong></span>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="modalToggleWatchedBtn">
+                        <i class="fa-solid fa-circle-check"></i> Mark as Watched
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="data.js"></script>
+    <script src="tmdb.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // --- Starfield Background Animation ---
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+
+        let stars = [];
+        const STAR_COUNT = 85;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < STAR_COUNT; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.6 + 0.4,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    twinkleSpeed: Math.random() * 0.015 + 0.004,
+                    twinkleDirection: Math.random() > 0.5 ? 1 : -1
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            stars.forEach(star => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                star.alpha += star.twinkleSpeed * star.twinkleDirection;
+                if (star.alpha >= 1) {
+                    star.alpha = 1;
+                    star.twinkleDirection = -1;
+                } else if (star.alpha <= 0.1) {
+                    star.alpha = 0.1;
+                    star.twinkleDirection = 1;
+                }
+            });
+            
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animateStars();
+
+        // --- MCU Quotes & Trivia Dataset ---
+        const MCU_QUOTES = [
+            { text: "Part of the journey is the end.", author: "Tony Stark" },
+            { text: "I can do this all day.", author: "Steve Rogers" },
+            { text: "I am Iron Man.", author: "Tony Stark" },
+            { text: "We are Groot.", author: "Groot" },
+            { text: "Higher, further, faster, baby.", author: "Carol Danvers" },
+            { text: "I love you 3000.", author: "Morgan Stark" },
+            { text: "In times of crisis, the wise build bridges, while the foolish build barriers.", author: "T'Challa" },
+            { text: "The universe is required to be in balance.", author: "Thanos" },
+            { text: "I'm with you 'til the end of the line.", author: "Steve Rogers" },
+            { text: "You're a product of all who came before you.", author: "Ying Li" },
+            { text: "There was an idea... to bring together a group of remarkable people.", author: "Nick Fury" }
+        ];
+
+        // --- Application State ---
+        let watchedIds = [];
+        const STORAGE_KEY = 'mcu_marathon_watched';
+
+        let currentOrder = 'release'; // 'release' or 'chrono'
+        let searchQuery = '';
+        let selectedType = 'all';
+        let selectedPhase = 'all';
+        let selectedStatus = 'all';
+        let activeSort = 'release';
+        let currentModalMovie = null;
+
+        // --- Local Storage Progress Tracking ---
+        function loadProgress() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    watchedIds = JSON.parse(stored);
+                } catch (e) {
+                    watchedIds = [];
+                }
+            } else {
+                watchedIds = [];
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(watchedIds));
+        }
+
+        // --- Filtering and Sorting Engine ---
+        function getFilteredAndSortedData() {
+            let items = [...MCU_DATA];
+            
+            // 1. Search Query Filter (Title, Director, Characters)
+            if (searchQuery.trim() !== '') {
+                const query = searchQuery.toLowerCase().trim();
+                items = items.filter(item => 
+                    item.title.toLowerCase().includes(query) ||
+                    item.director.toLowerCase().includes(query) ||
+                    item.characters.some(char => char.toLowerCase().includes(query))
+                );
+            }
+            
+            // 2. Format / Type Filter
+            if (selectedType !== 'all') {
+                items = items.filter(item => item.type === selectedType);
+            }
+            
+            // 3. Phase Filter
+            if (selectedPhase !== 'all') {
+                items = items.filter(item => item.phase.toString() === selectedPhase);
+            }
+            
+            // 4. Status Filter
+            if (selectedStatus !== 'all') {
+                const isWatched = selectedStatus === 'watched';
+                items = items.filter(item => watchedIds.includes(item.id) === isWatched);
+            }
+            
+            // 5. Sorting Engine
+            items.sort((a, b) => {
+                switch (activeSort) {
+                    case 'release':
+                        return MCU_DATA.indexOf(a) - MCU_DATA.indexOf(b);
+                    case 'chronological':
+                        return a.chronologicalOrder - b.chronologicalOrder;
+                    case 'runtime-desc':
+                        return b.runtime - a.runtime;
+                    case 'runtime-asc':
+                        return a.runtime - b.runtime;
+                    case 'rating-imdb':
+                        return b.ratingIMDb - a.ratingIMDb;
+                    case 'rating-rt':
+                        return b.ratingRT - a.ratingRT;
+                    default:
+                        return 0;
+                }
+            });
+            
+            return items;
+        }
+
+        // --- Render UI Elements ---
+        
+        // Render Main Media Cards Grid
+        function renderGrid() {
+            const items = getFilteredAndSortedData();
+            const mediaGrid = document.getElementById('mediaGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            mediaGrid.innerHTML = '';
+            
+            if (items.length === 0) {
+                emptyState.style.display = 'block';
+                mediaGrid.style.display = 'none';
+                document.getElementById('showingCount').textContent = '0';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            mediaGrid.style.display = 'grid';
+            document.getElementById('showingCount').textContent = items.length;
+            
+            items.forEach(item => {
+                const isWatched = watchedIds.includes(item.id);
+                const card = document.createElement('div');
+                card.className = `media-card ${isWatched ? 'watched' : ''}`;
+                card.dataset.id = item.id;
+                card.style.setProperty('--cover-gradient', item.coverGradient);
+                
+                let formatIcon = 'fa-film';
+                if (item.type === 'series') formatIcon = 'fa-tv';
+                if (item.type === 'special') formatIcon = 'fa-mask';
+                
+                card.innerHTML = `
+                    <div class="card-header-art">
+                        <div class="card-badges">
+                            <span class="format-badge"><i class="fa-solid ${formatIcon}"></i> ${item.type}</span>
+                            <span class="phase-badge">Phase ${item.phase}</span>
+                        </div>
+                        <div class="watched-toggle-area">
+                            <button class="card-checkbox" title="Toggle Watched" data-id="${item.id}">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-details">
+                        <div class="card-meta-top">
+                            <span>${new Date(item.releaseDate).getFullYear()}</span>
+                            <span>${item.runtime} mins</span>
+                        </div>
+                        <h3 class="card-title">${item.title}</h3>
+                        <div class="card-ratings">
+                            <div class="rating-item"><i class="fa-solid fa-star text-gold"></i> ${item.ratingIMDb}</div>
+                            <div class="rating-item"><i class="fa-solid fa-apple-whole text-red"></i> ${item.ratingRT}%</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Open modal on card body click
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.watched-toggle-area') || e.target.closest('.card-checkbox')) {
+                        return;
+                    }
+                    openDetails(item);
+                });
+                
+                // Direct checkbox trigger
+                const checkbox = card.querySelector('.card-checkbox');
+                checkbox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleWatched(item.id);
+                });
+                
+                mediaGrid.appendChild(card);
+            });
+        }
+
+        // Render Phase Progress Bars
+        function renderPhaseProgressBars() {
+            const container = document.getElementById('phaseBarsContainer');
+            container.innerHTML = '';
+            
+            const phases = [1, 2, 3, 4, 5];
+            phases.forEach(phaseNum => {
+                const phaseItems = MCU_DATA.filter(item => item.phase === phaseNum);
+                const total = phaseItems.length;
+                const watched = phaseItems.filter(item => watchedIds.includes(item.id)).length;
+                const percentage = total > 0 ? Math.round((watched / total) * 100) : 0;
+                
+                const phaseBar = document.createElement('div');
+                phaseBar.className = 'phase-progress-item';
+                phaseBar.innerHTML = `
+                    <div class="phase-progress-info">
+                        <span class="phase-name">Phase ${phaseNum}</span>
+                        <span class="phase-percentage">${percentage}% (${watched}/${total})</span>
+                    </div>
+                    <div class="phase-track">
+                        <div class="phase-fill" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+                container.appendChild(phaseBar);
+            });
+        }
+
+        // Update Statistics Dashboard
+        function updateDashboard() {
+            const stats = getMCUStats(watchedIds);
+            
+            // Percentage Text & SVG Circular Indicator
+            document.getElementById('progressPercent').textContent = `${stats.percentage}%`;
+            document.getElementById('progressRatio').textContent = `${stats.watched} / ${stats.total}`;
+            
+            const circle = document.getElementById('progressCircle');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            const offset = circumference - (stats.percentage / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            // Runtime Statistics
+            const totalHours = Math.floor(stats.totalRuntime / 60);
+            const totalMinutes = stats.totalRuntime % 60;
+            document.getElementById('totalTime').textContent = `${totalHours}h ${totalMinutes}m`;
+            
+            const watchedHours = Math.floor(stats.watchedRuntime / 60);
+            const watchedMinutes = stats.watchedRuntime % 60;
+            document.getElementById('timeWatched').textContent = `${watchedHours}h ${watchedMinutes}m`;
+            
+            const remainingMinutesTotal = stats.totalRuntime - stats.watchedRuntime;
+            const remainingHours = Math.floor(remainingMinutesTotal / 60);
+            const remainingMinutes = remainingMinutesTotal % 60;
+            document.getElementById('timeRemaining').textContent = `${remainingHours}h ${remainingMinutes}m`;
+            
+            // Media Breakdown Counts
+            document.getElementById('moviesCount').textContent = `${stats.moviesCount.watched} / ${stats.moviesCount.total}`;
+            document.getElementById('seriesCount').textContent = `${stats.seriesCount.watched} / ${stats.seriesCount.total}`;
+            document.getElementById('specialsCount').textContent = `${stats.specialsCount.watched} / ${stats.specialsCount.total}`;
+            
+            // Dynamic Phase Progression
+            renderPhaseProgressBars();
+            
+            // Recalculate schedule if widget results are open
+            if (document.getElementById('calcResults').style.display === 'block') {
+                calculateSchedule();
+            }
+        }
+
+        // Toggle Watched status of a media item
+        function toggleWatched(id) {
+            const idx = watchedIds.indexOf(id);
+            if (idx === -1) {
+                watchedIds.push(id);
+            } else {
+                watchedIds.splice(idx, 1);
+            }
+            saveProgress();
+            updateDashboard();
+            renderGrid();
+            
+            if (document.getElementById('detailsModal').classList.contains('active') && currentModalMovie && currentModalMovie.id === id) {
+                updateModalActionBtn(id);
+            }
+        }
+
+        // --- Details Slide-Out Modal Drawer ---
+        function openDetails(movie) {
+            currentModalMovie = movie;
+            
+            const modal = document.getElementById('detailsModal');
+            const modalHero = document.getElementById('modalHero');
+            const modalPhaseTag = document.getElementById('modalPhaseTag');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalSubtitle = document.getElementById('modalSubtitle');
+            const modalFormat = document.getElementById('modalFormat');
+            const modalRuntime = document.getElementById('modalRuntime');
+            const modalIMDb = document.getElementById('modalIMDb');
+            const modalRT = document.getElementById('modalRT');
+            const modalSynopsis = document.getElementById('modalSynopsis');
+            const modalCharacters = document.getElementById('modalCharacters');
+            const modalPostCredits = document.getElementById('modalPostCredits');
+            
+            modalHero.style.background = movie.coverGradient;
+            modalPhaseTag.textContent = `Phase ${movie.phase}`;
+            modalTitle.textContent = movie.title;
+            modalSubtitle.innerHTML = `Director: <strong>${movie.director}</strong> &bull; ${new Date(movie.releaseDate).getFullYear()}`;
+            
+            let formatLabel = `<i class="fa-solid fa-film"></i> Movie`;
+            if (movie.type === 'series') formatLabel = `<i class="fa-solid fa-tv"></i> Disney+ Series`;
+            if (movie.type === 'special') formatLabel = `<i class="fa-solid fa-mask"></i> Special Presentation`;
+            modalFormat.innerHTML = formatLabel;
+            
+            modalRuntime.textContent = `${movie.runtime} minutes`;
+            modalIMDb.innerHTML = `<i class="fa-solid fa-star text-gold"></i> ${movie.ratingIMDb}`;
+            modalRT.innerHTML = `<i class="fa-solid fa-apple-whole text-red"></i> ${movie.ratingRT}%`;
+            modalSynopsis.textContent = movie.synopsis;
+            modalPostCredits.textContent = movie.postCredits;
+            
+            modalCharacters.innerHTML = '';
+            movie.characters.forEach(char => {
+                const tag = document.createElement('span');
+                tag.className = 'char-tag';
+                tag.textContent = char;
+                modalCharacters.appendChild(tag);
+            });
+            
+            updateModalActionBtn(movie.id);
+            modal.classList.add('active');
+        }
+
+        function updateModalActionBtn(id) {
+            const btn = document.getElementById('modalToggleWatchedBtn');
+            const isWatched = watchedIds.includes(id);
+            
+            if (isWatched) {
+                btn.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Mark as Unwatched`;
+                btn.className = 'btn btn-secondary';
+            } else {
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Mark as Watched`;
+                btn.className = 'btn btn-primary';
+            }
+        }
+
+        function closeDetails() {
+            document.getElementById('detailsModal').classList.remove('active');
+            currentModalMovie = null;
+        }
+
+        // --- Schedule Planner Calculator logic ---
+        function calculateSchedule() {
+            const targetInput = document.getElementById('targetDate');
+            const resultsContainer = document.getElementById('calcResults');
+            
+            if (!targetInput.value) {
+                resultsContainer.innerHTML = `<p class="calc-badge" style="background: rgba(237, 29, 36, 0.1); color: var(--marvel-red); border-color: rgba(237, 29, 36, 0.2);">Please select a target date.</p>`;
+                resultsContainer.style.display = 'block';
+                return;
+            }
+            
+            const targetDate = new Date(targetInput.value);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            targetDate.setHours(0,0,0,0);
+            
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays <= 0) {
+                resultsContainer.innerHTML = `<p class="calc-badge" style="background: rgba(237, 29, 36, 0.1); color: var(--marvel-red); border-color: rgba(237, 29, 36, 0.2);">The date must be in the future!</p>`;
+                resultsContainer.style.display = 'block';
+                return;
+            }
+            
+            const stats = getMCUStats(watchedIds);
+            const remainingMinutes = stats.totalRuntime - stats.watchedRuntime;
+            
+            if (remainingMinutes <= 0) {
+                resultsContainer.innerHTML = `<p class="calc-badge" style="background: rgba(0, 242, 254, 0.1); color: var(--cosmic-cyan); border-color: rgba(0, 242, 254, 0.2);"><i class="fa-solid fa-trophy"></i> Marathon fully completed!</p>`;
+                resultsContainer.style.display = 'block';
+                return;
+            }
+            
+            const minsPerDay = Math.ceil(remainingMinutes / diffDays);
+            const hoursPerDay = Math.floor(minsPerDay / 60);
+            const remainingMinsPerDay = minsPerDay % 60;
+            
+            let budgetString = '';
+            if (hoursPerDay > 0) {
+                budgetString = `${hoursPerDay}h ${remainingMinsPerDay}m per day`;
+            } else {
+                budgetString = `${remainingMinsPerDay} mins per day`;
+            }
+            
+            const remainingHours = Math.floor(remainingMinutes / 60);
+            const remainingMins = remainingMinutes % 60;
+            
+            resultsContainer.innerHTML = `
+                <div class="calc-stat-row">
+                    <span class="calc-label">Time Remaining:</span>
+                    <span class="calc-val">${remainingHours}h ${remainingMins}m</span>
+                </div>
+                <div class="calc-stat-row">
+                    <span class="calc-label">Days Available:</span>
+                    <span class="calc-val">${diffDays} days</span>
+                </div>
+                <div class="calc-badge">
+                    <i class="fa-solid fa-fire"></i> Required Daily Budget: <br>
+                    <span style="font-size: 1.1rem; color: #fff;">${budgetString}</span>
+                </div>
+            `;
+            resultsContainer.style.display = 'block';
+        }
+
+        // --- Next unwatched sequencing suggestion ("Surprise Me") ---
+        function surpriseMe() {
+            const unwatched = MCU_DATA.filter(item => !watchedIds.includes(item.id));
+            
+            if (unwatched.length === 0) {
+                alert("True Believer! You have completed the entire Marvel Cinematic Universe Marathon! You are worthy to wield Mjolnir!");
+                return;
+            }
+            
+            unwatched.sort((a, b) => {
+                if (currentOrder === 'release') {
+                    return MCU_DATA.indexOf(a) - MCU_DATA.indexOf(b);
+                } else {
+                    return a.chronologicalOrder - b.chronologicalOrder;
+                }
+            });
+            
+            // Recommend the very next unwatched item in sequence and slide it open
+            const nextUp = unwatched[0];
+            openDetails(nextUp);
+        }
+
+        // --- Bulk Actions ---
+        function markAllFilteredAsWatched() {
+            const items = getFilteredAndSortedData();
+            const unwatchedItems = items.filter(item => !watchedIds.includes(item.id));
+            
+            if (unwatchedItems.length === 0) {
+                alert("All matching titles are already marked as watched!");
+                return;
+            }
+            
+            if (confirm(`Mark all ${unwatchedItems.length} currently filtered titles as watched?`)) {
+                unwatchedItems.forEach(item => {
+                    if (!watchedIds.includes(item.id)) {
+                        watchedIds.push(item.id);
+                    }
+                });
+                saveProgress();
+                updateDashboard();
+                renderGrid();
+            }
+        }
+
+        function resetAllProgress() {
+            if (confirm("Are you sure you want to completely reset all your watched progress? This will revert the tracker back to 0%.")) {
+                watchedIds = [];
+                saveProgress();
+                updateDashboard();
+                renderGrid();
+            }
+        }
+
+        // --- DOM Event Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            updateDashboard();
+            
+            // Random Quote initialization
+            const quoteEl = document.getElementById('triviaQuote');
+            const authorEl = document.getElementById('triviaAuthor');
+            const randomQuote = MCU_QUOTES[Math.floor(Math.random() * MCU_QUOTES.length)];
+            quoteEl.textContent = `"${randomQuote.text}"`;
+            authorEl.textContent = `- ${randomQuote.author}`;
+            
+            renderGrid();
+            
+            // Search Input Event
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                renderGrid();
+            });
+            
+            // Filter dropdown change triggers
+            document.getElementById('typeFilter').addEventListener('change', (e) => {
+                selectedType = e.target.value;
+                renderGrid();
+            });
+            
+            document.getElementById('phaseFilter').addEventListener('change', (e) => {
+                selectedPhase = e.target.value;
+                renderGrid();
+            });
+            
+            document.getElementById('statusFilter').addEventListener('change', (e) => {
+                selectedStatus = e.target.value;
+                renderGrid();
+            });
+            
+            // Sort Dropdown changes
+            const sortBySelect = document.getElementById('sortBy');
+            sortBySelect.addEventListener('change', (e) => {
+                activeSort = e.target.value;
+                
+                const releaseBtn = document.getElementById('orderReleaseBtn');
+                const chronoBtn = document.getElementById('orderChronoBtn');
+                
+                if (activeSort === 'release') {
+                    currentOrder = 'release';
+                    releaseBtn.classList.add('active');
+                    chronoBtn.classList.remove('active');
+                    document.getElementById('gridInfoText').textContent = 'Showing release order';
+                } else if (activeSort === 'chronological') {
+                    currentOrder = 'chrono';
+                    chronoBtn.classList.add('active');
+                    releaseBtn.classList.remove('active');
+                    document.getElementById('gridInfoText').textContent = 'Showing chronological order';
+                }
+                renderGrid();
+            });
+            
+            // Order Button toggle bindings
+            const releaseBtn = document.getElementById('orderReleaseBtn');
+            const chronoBtn = document.getElementById('orderChronoBtn');
+            
+            releaseBtn.addEventListener('click', () => {
+                currentOrder = 'release';
+                activeSort = 'release';
+                sortBySelect.value = 'release';
+                releaseBtn.classList.add('active');
+                chronoBtn.classList.remove('active');
+                document.getElementById('gridInfoText').textContent = 'Showing release order';
+                renderGrid();
+            });
+            
+            chronoBtn.addEventListener('click', () => {
+                currentOrder = 'chrono';
+                activeSort = 'chronological';
+                sortBySelect.value = 'chronological';
+                chronoBtn.classList.add('active');
+                releaseBtn.classList.remove('active');
+                document.getElementById('gridInfoText').textContent = 'Showing chronological order';
+                renderGrid();
+            });
+            
+            // Action Button listeners
+            document.getElementById('surpriseMeBtn').addEventListener('click', surpriseMe);
+            document.getElementById('markAllBtn').addEventListener('click', markAllFilteredAsWatched);
+            document.getElementById('resetAllBtn').addEventListener('click', resetAllProgress);
+            
+            // Calculator triggering
+            document.getElementById('calculateBtn').addEventListener('click', calculateSchedule);
+            
+            // Modal closing controllers
+            document.getElementById('modalCloseBtn').addEventListener('click', closeDetails);
+            
+            document.getElementById('detailsModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('detailsModal')) {
+                    closeDetails();
+                }
+            });
+            
+            document.getElementById('modalToggleWatchedBtn').addEventListener('click', () => {
+                if (currentModalMovie) {
+                    toggleWatched(currentModalMovie.id);
+                }
+            });
+            
+            // Clear filters event on empty state
+            document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+                document.getElementById('searchInput').value = '';
+                searchQuery = '';
+                document.getElementById('typeFilter').value = 'all';
+                selectedType = 'all';
+                document.getElementById('phaseFilter').value = 'all';
+                selectedPhase = 'all';
+                document.getElementById('statusFilter').value = 'all';
+                selectedStatus = 'all';
+                renderGrid();
+            });
+            
+            // Esc key handler
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeDetails();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
