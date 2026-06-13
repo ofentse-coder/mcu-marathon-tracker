@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Timezone Digital Clock</title>
+    <link rel="stylesheet" href="clock.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Timezone Digital Clock</h1>
+        
+        <div class="controls">
+            <label for="timezone-select">Add Timezone:</label>
+            <select id="timezone-select">
+                <option value="">-- Select a Timezone --</option>
+                <option value="America/New_York">New York (EST)</option>
+                <option value="America/Chicago">Chicago (CST)</option>
+                <option value="America/Denver">Denver (MST)</option>
+                <option value="America/Los_Angeles">Los Angeles (PST)</option>
+                <option value="Europe/London">London (GMT)</option>
+                <option value="Europe/Paris">Paris (CET)</option>
+                <option value="Europe/Berlin">Berlin (CET)</option>
+                <option value="Asia/Tokyo">Tokyo (JST)</option>
+                <option value="Asia/Shanghai">Shanghai (CST)</option>
+                <option value="Asia/Hong_Kong">Hong Kong (HKT)</option>
+                <option value="Asia/Singapore">Singapore (SGT)</option>
+                <option value="Asia/Dubai">Dubai (GST)</option>
+                <option value="Australia/Sydney">Sydney (AEDT)</option>
+                <option value="Pacific/Auckland">Auckland (NZDT)</option>
+                <option value="Africa/Johannesburg">Johannesburg (SAST)</option>
+                <option value="UTC">UTC</option>
+            </select>
+            <button id="add-btn">Add</button>
+        </div>
+
+        <div class="clocks-grid" id="clocks-grid">
+            <!-- Clock cards will be dynamically added here -->
+        </div>
+
+        <div class="info">
+            <p>Click "Add" to add more time zones, or click the X on any clock to remove it.</p>
+        </div>
+    </div>
+
+    <script src="clock.js"></script>
+</body>
+</html>
